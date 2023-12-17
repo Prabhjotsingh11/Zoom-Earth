@@ -1,57 +1,57 @@
-function getWeather(){
-    let apiKey="2fcf65692089cee320dfee2a6bbe888a";
-    let city=document.getElementById('city').value;
+async function getWeather() {
+    const apiKey = "2fcf65692089cee320dfee2a6bbe888a";
+    const cityInput = document.getElementById('city');
+    const city = cityInput.value.trim();
 
-    if(!city){
+    if (!city) {
         alert('Please enter a city');
         return;
     }
 
-    const currentWeatherUrl=`https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}`;
+    const currentWeatherUrl = `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}`;
 
-        fetch(currentWeatherUrl)
-            .then(response => response.json())
-            .then(data=> {
-                displayWeather(data);
-            })
-            .catch(error=>{
-                console.error('Error',error);
-                alert('Error');
-            });
+    try {
+        const response = await fetch(currentWeatherUrl);
+        const data = await response.json();
+        displayWeather(data);
+    } catch (error) {
+        console.error('Error', error);
+        alert('Error fetching weather data');
     }
+}
 
+function displayWeather(data) {
+    const tempContainer = document.getElementById('temp-container');
+    const weatherInfoContainer = document.getElementById('weather-info');
+    const weatherIcon = document.getElementById('weather-icon');
 
-    function displayWeather(data){
-        const tempDivInfo=document.getElementById('temp-container');
-        const weatherInfoDiv=document.getElementById('weather-info');
-        const weatherIcon=document.getElementById('weather-icon');
+    tempContainer.innerHTML = '';
+    weatherInfoContainer.innerHTML = '';
 
-        tempDivInfo.innerHTML='';
-        weatherInfoDiv.innerHTML='';
+    if (data.cod === '404') {
+        weatherInfoContainer.innerHTML = `<p>${data.message}</p>`;
+    } else {
+        const cityName = data.name;
+        const temperature = Math.round(data.main.temp - 273.15);
+        const description = data.weather[0].description;
+        const iconCode = data.weather[0].icon;
+        const iconUrl = `https://openweathermap.org/img/wn/${iconCode}@4x.png`;
 
-        if(data.cod==='404'){
-            weatherInfoDiv.innerHTML=`<p>${data.message}</p>`;
-        }else{
-            const cityName=data.name;
-            const tempeature=Math.round(data.main.temp-273.15);
-            const description=data.weather[0].description;
-            const iconCode=data.weather[0].icon;
-            const iconUrl=`https://openweathermap.org/img/wn/${iconCode}@4x.png`;
+        const temperatureHTML = `<p>${temperature}°C</p>`;
+        const weatherHTML = `
+            <p>${cityName}</p>
+            <p>${description}</p>`;
 
-            const tempeatureHTML=`<p>${tempeature}°C</p>`;
-            const weatherHTMl=`
-                <p>${cityName}</p>
-                <p>${description}</p>`;
-            
-            tempDivInfo.innerHTML=tempeatureHTML;
-            weatherInfoDiv.innerHTML=weatherHTMl;
-            weatherIcon.src=iconUrl;
-            weatherIcon.alt=description;
+        tempContainer.innerHTML = temperatureHTML;
+        weatherInfoContainer.innerHTML = weatherHTML;
+        weatherIcon.src = iconUrl;
+        weatherIcon.alt = description;
 
-            showImage();            
-        }
+        showWeatherIcon();
     }
-    function showImage() {
-        const weatherIcon = document.getElementById('weather-icon');
-        weatherIcon.style.display = 'block'; 
-    }
+}
+
+function showWeatherIcon() {
+    const weatherIcon = document.getElementById('weather-icon');
+    weatherIcon.style.display = 'block';
+}
